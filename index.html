@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+<style>
+  canvas { touch-action: none; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors">
+
+  <header class="border-b border-slate-200 dark:border-slate-700">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-semibold cursor-pointer" id="site-title">Tools Portal</h1>
+      <button id="theme-toggle"
+        class="px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-600 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
+        <span id="theme-toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+
+    <!-- HOME VIEW -->
+    <section id="view-home">
+      <p class="text-slate-600 dark:text-slate-400 mb-6">
+        A growing collection of small web tools and learning artifacts. Pick one to try it out.
+      </p>
+      <div id="tool-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- AEROFOIL VIEW -->
+    <section id="view-aerofoil" class="hidden">
+      <button class="back-btn mb-4 text-sm text-slate-600 dark:text-slate-400 hover:underline">&larr; Back to tools</button>
+      <h2 class="text-lg font-semibold mb-1">Aerofoil (NACA 4-digit)</h2>
+      <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm">
+        Enter a NACA 4-digit code to visualize the airfoil cross-section.
+      </p>
+
+      <div class="flex items-center gap-3 mb-2">
+        <label for="naca-code" class="text-sm font-medium">NACA code</label>
+        <input id="naca-code" type="text" value="2412" maxlength="4"
+          class="w-24 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono">
+      </div>
+      <p id="naca-error" class="text-sm text-red-600 dark:text-red-400 mb-3 hidden"></p>
+
+      <canvas id="naca-canvas" width="800" height="400"
+        class="w-full border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800"></canvas>
+    </section>
+
+    <!-- FBD VIEW -->
+    <section id="view-fbd" class="hidden">
+      <button class="back-btn mb-4 text-sm text-slate-600 dark:text-slate-400 hover:underline">&larr; Back to tools</button>
+      <h2 class="text-lg font-semibold mb-1">Free Body Diagram Calculator</h2>
+      <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm">
+        Add forces as Fx/Fy components. The diagram and resultant update live.
+      </p>
+
+      <div id="fbd-rows" class="space-y-2 mb-3"></div>
+      <button id="fbd-add-row"
+        class="mb-6 px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-600 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
+        + Add force
+      </button>
+
+      <canvas id="fbd-canvas" width="800" height="450"
+        class="w-full border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 mb-4"></canvas>
+
+      <div id="fbd-readout" class="text-sm font-mono grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+    </section>
+
+  </main>
+
+<script>
+  // ---------- Tools config (drives home cards + nav) ----------
+  const TOOLS = [
+    { id: 'aerofoil', title: 'Aerofoil (NACA 4-digit)', description: 'Visualize a NACA 4-digit airfoil cross-section.' },
+    { id: 'fbd', title: 'Free Body Diagram Calculator', description: 'Add forces and compute the resultant vector.' },
+  ];
+
+  // ---------- Shell: view switching ----------
+  function showView(id) {
+    document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+    const target = document.getElementById(id === 'home' ? 'view-home' : `view-${id}`);
+    target.classList.remove('hidden');
+  }
+
+  function renderToolGrid() {
+    const grid = document.getElementById('tool-grid');
+    grid.innerHTML = '';
+    TOOLS.forEach(tool => {
+      const card = document.createElement('button');
+      card.className = 'text-left p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 transition-colors';
+      card.innerHTML = `
+        <h3 class="font-semibold mb-1">${tool.title}</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400">${tool.description}</p>
+      `;
+      card.addEventListener('click', () => showView(tool.id));
+      grid.appendChild(card);
+    });
+  }
+
+  document.querySelectorAll('.back-btn').forEach(btn => {
+    btn.addEventListener('click', () => showView('home'));
+  });
+  document.getElementById('site-title').addEventListener('click', () => showView('home'));
+
+  renderToolGrid();
+  showView('home');
+
+  // ---------- Shell: theme toggle ----------
+  const THEME_KEY = 'tools-portal-theme';
+  function applyTheme(theme) {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.getElementById('theme-toggle-label').textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+  }
+  function initTheme() {
+    const stored = localStorage.getItem(THEME_KEY);
+    const theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(theme);
+  }
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+  initTheme();
+
+  // ---------- Aerofoil module ----------
+  (function () {
+    const input = document.getElementById('naca-code');
+    const errorEl = document.getElementById('naca-error');
+    const canvas = document.getElementById('naca-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function nacaCoordinates(code, numPoints) {
+      const m = parseInt(code[0], 10) / 100;      // max camber
+      const p = parseInt(code[1], 10) / 10;       // location of max camber
+      const t = parseInt(code.slice(2), 10) / 100; // max thickness
+
+      const upper = [];
+      const lower = [];
+
+      for (let i = 0; i <= numPoints; i++) {
+        // cosine spacing for smoother edges
+        const beta = (i / numPoints) * Math.PI;
+        const x = (1 - Math.cos(beta)) / 2;
+
+        const yt = 5 * t * (
+          0.2969 * Math.sqrt(x) -
+          0.1260 * x -
+          0.3516 * x ** 2 +
+          0.2843 * x ** 3 -
+          0.1015 * x ** 4
+        );
+
+        let yc, dyc_dx;
+        if (m === 0 || p === 0) {
+          yc = 0;
+          dyc_dx = 0;
+        } else if (x < p) {
+          yc = (m / p ** 2) * (2 * p * x - x ** 2);
+          dyc_dx = (2 * m / p ** 2) * (p - x);
+        } else {
+          yc = (m / (1 - p) ** 2) * ((1 - 2 * p) + 2 * p * x - x ** 2);
+          dyc_dx = (2 * m / (1 - p) ** 2) * (p - x);
+        }
+
+        const theta = Math.atan(dyc_dx);
+
+        upper.push({ x: x - yt * Math.sin(theta), y: yc + yt * Math.cos(theta) });
+        lower.push({ x: x + yt * Math.sin(theta), y: yc - yt * Math.cos(theta) });
+      }
+
+      return { upper, lower };
+    }
+
+    function drawAirfoil(code) {
+      const { upper, lower } = nacaCoordinates(code, 100);
+
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+      const axisColor = isDark ? '#64748b' : '#94a3b8';
+      const lineColor = isDark ? '#38bdf8' : '#0284c7';
+
+      const margin = 40;
+      const plotW = w - margin * 2;
+      const scale = plotW; // chord = 1 maps to plotW px
+      const originX = margin;
+      const originY = h / 2;
+
+      // gridlines
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      for (let gx = 0; gx <= 1; gx += 0.1) {
+        const px = originX + gx * scale;
+        ctx.beginPath();
+        ctx.moveTo(px, margin);
+        ctx.lineTo(px, h - margin);
+        ctx.stroke();
+      }
+
+      // axis (chord line)
+      ctx.strokeStyle = axisColor;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(originX + scale, originY);
+      ctx.stroke();
+
+      // airfoil outline: upper surface then lower surface reversed
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      upper.forEach((pt, i) => {
+        const px = originX + pt.x * scale;
+        const py = originY - pt.y * scale;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      for (let i = lower.length - 1; i >= 0; i--) {
+        const px = originX + lower[i].x * scale;
+        const py = originY - lower[i].y * scale;
+        ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
+
+    function handleInput() {
+      const raw = input.value.trim();
+      if (!/^\d{4}$/.test(raw)) {
+        errorEl.textContent = 'Enter exactly 4 digits, e.g. 2412.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      errorEl.classList.add('hidden');
+      drawAirfoil(raw);
+    }
+
+    input.addEventListener('input', handleInput);
+    // redraw on theme change so line colors stay correct
+    document.getElementById('theme-toggle').addEventListener('click', () => handleInput());
+
+    handleInput();
+  })();
+
+  // ---------- Free Body Diagram module ----------
+  (function () {
+    const rowsEl = document.getElementById('fbd-rows');
+    const addBtn = document.getElementById('fbd-add-row');
+    const canvas = document.getElementById('fbd-canvas');
+    const ctx = canvas.getContext('2d');
+    const readoutEl = document.getElementById('fbd-readout');
+
+    let nextId = 1;
+    let rows = [];
+
+    function addRow(fx, fy) {
+      rows.push({ id: nextId++, fx, fy });
+      renderRows();
+      update();
+    }
+
+    function removeRow(id) {
+      rows = rows.filter(r => r.id !== id);
+      renderRows();
+      update();
+    }
+
+    function renderRows() {
+      rowsEl.innerHTML = '';
+      rows.forEach(row => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-2';
+        div.innerHTML = `
+          <span class="text-sm w-16 text-slate-600 dark:text-slate-400">Force #${row.id}</span>
+          <label class="text-xs">Fx</label>
+          <input type="number" value="${row.fx}" data-id="${row.id}" data-axis="fx"
+            class="fbd-input w-24 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+          <label class="text-xs">Fy</label>
+          <input type="number" value="${row.fy}" data-id="${row.id}" data-axis="fy"
+            class="fbd-input w-24 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+          <button data-id="${row.id}" class="fbd-remove text-sm text-red-600 dark:text-red-400 hover:underline ml-auto">Remove</button>
+        `;
+        rowsEl.appendChild(div);
+      });
+
+      rowsEl.querySelectorAll('.fbd-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const id = Number(inp.dataset.id);
+          const axis = inp.dataset.axis;
+          const row = rows.find(r => r.id === id);
+          const val = parseFloat(inp.value);
+          row[axis] = isNaN(val) ? 0 : val;
+          update();
+        });
+      });
+      rowsEl.querySelectorAll('.fbd-remove').forEach(btn => {
+        btn.addEventListener('click', () => removeRow(Number(btn.dataset.id)));
+      });
+    }
+
+    function drawDiagram(sumFx, sumFy) {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+      const axisColor = isDark ? '#64748b' : '#94a3b8';
+      const forceColor = isDark ? '#38bdf8' : '#0284c7';
+      const resultColor = isDark ? '#f97316' : '#ea580c';
+
+      const cx = w / 2;
+      const cy = h / 2;
+
+      // gridlines
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      for (let gx = 40; gx < w; gx += 40) {
+        ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
+      }
+      for (let gy = 40; gy < h; gy += 40) {
+        ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+      }
+
+      // axes through origin
+      ctx.strokeStyle = axisColor;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+
+      // determine scale so the largest vector (including resultant) fits
+      const magnitudes = rows.map(r => Math.hypot(r.fx, r.fy));
+      magnitudes.push(Math.hypot(sumFx, sumFy));
+      const maxMag = Math.max(...magnitudes, 1e-9);
+      const maxRadius = Math.min(w, h) / 2 - 30;
+      const scale = maxMag > 0 ? maxRadius / maxMag : 0;
+
+      function drawArrow(fx, fy, color, dashed) {
+        const mag = Math.hypot(fx, fy);
+        if (mag < 1e-9) return;
+        const ex = cx + fx * scale;
+        const ey = cy - fy * scale;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2.5;
+        if (dashed) ctx.setLineDash([6, 4]);
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+
+        // arrowhead
+        const angle = Math.atan2(ey - cy, ex - cx);
+        const headLen = 10;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - headLen * Math.cos(angle - Math.PI / 6), ey - headLen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(ex - headLen * Math.cos(angle + Math.PI / 6), ey - headLen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      rows.forEach(r => drawArrow(r.fx, r.fy, forceColor, false));
+      drawArrow(sumFx, sumFy, resultColor, true);
+
+      // origin dot (covers the zero-vector / all-zero-forces case)
+      ctx.fillStyle = axisColor;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function update() {
+      const sumFx = rows.reduce((s, r) => s + r.fx, 0);
+      const sumFy = rows.reduce((s, r) => s + r.fy, 0);
+      const magnitude = Math.hypot(sumFx, sumFy);
+      const angle = magnitude < 1e-9 ? 0 : (Math.atan2(sumFy, sumFx) * 180 / Math.PI);
+
+      readoutEl.innerHTML = `
+        <div>&Sigma;Fx: <span class="font-semibold">${sumFx.toFixed(2)}</span></div>
+        <div>&Sigma;Fy: <span class="font-semibold">${sumFy.toFixed(2)}</span></div>
+        <div>|R|: <span class="font-semibold">${magnitude.toFixed(2)}</span></div>
+        <div>&theta;: <span class="font-semibold">${angle.toFixed(1)}&deg;</span></div>
+      `;
+
+      drawDiagram(sumFx, sumFy);
+    }
+
+    addBtn.addEventListener('click', () => addRow(0, 0));
+    document.getElementById('theme-toggle').addEventListener('click', () => update());
+
+    addRow(10, 5);
+    addRow(-4, 8);
+  })();
+</script>
+</body>
+</html>
