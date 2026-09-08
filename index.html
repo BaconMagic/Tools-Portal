@@ -4,73 +4,105 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tools Portal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = { darkMode: 'class' };
 </script>
 <style>
   canvas { touch-action: none; }
+
+  :root {
+    --bg: #f7f6f2;
+    --text: #16161a;
+    --muted: #6b6b72;
+    --divider: #e5e3db;
+    --accent: #4d7c0f;
+    --accent-2: #b45309;
+  }
+  .dark {
+    --bg: #101014;
+    --text: #f2f2f0;
+    --muted: #9c9ca2;
+    --divider: #26262c;
+    --accent: #d4ff5c;
+    --accent-2: #ffb347;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
 </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors">
+<body class="min-h-screen transition-colors">
 
-  <header class="border-b border-slate-200 dark:border-slate-700">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-      <h1 class="text-xl font-semibold cursor-pointer" id="site-title">Tools Portal</h1>
+  <header class="border-b" style="border-color: var(--divider);">
+    <div class="max-w-5xl mx-auto px-4 py-5 flex items-center justify-between">
+      <h1 class="font-display text-xl font-semibold cursor-pointer tracking-tight" id="site-title">Tools Portal</h1>
       <button id="theme-toggle"
-        class="px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-600 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
+        class="flex items-center gap-2 text-sm" style="color: var(--muted);">
         <span id="theme-toggle-label">Dark mode</span>
+        <span id="theme-toggle-switch" class="relative inline-block w-9 h-5 rounded-full transition-colors" style="background: var(--divider);">
+          <span id="theme-toggle-knob" class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform" style="background: var(--accent);"></span>
+        </span>
       </button>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 py-8">
+  <main class="max-w-5xl mx-auto px-4 py-10">
 
     <!-- HOME VIEW -->
     <section id="view-home">
-      <p class="text-slate-600 dark:text-slate-400 mb-6">
+      <p class="mb-8" style="color: var(--muted);">
         A growing collection of small web tools and learning artifacts. Pick one to try it out.
       </p>
-      <div id="tool-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+      <div id="tool-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:divide-x" style="border-color: var(--divider);"></div>
     </section>
 
     <!-- AEROFOIL VIEW -->
     <section id="view-aerofoil" class="hidden">
-      <button class="back-btn mb-4 text-sm text-slate-600 dark:text-slate-400 hover:underline">&larr; Back to tools</button>
-      <h2 class="text-lg font-semibold mb-1">Aerofoil (NACA 4-digit)</h2>
-      <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm">
+      <button class="back-btn mb-6 text-sm hover:underline" style="color: var(--accent);">&larr; Back to tools</button>
+      <h2 class="font-display text-lg font-semibold mb-1">Aerofoil (NACA 4-digit)</h2>
+      <p class="mb-5 text-sm" style="color: var(--muted);">
         Enter a NACA 4-digit code to visualize the airfoil cross-section.
       </p>
 
       <div class="flex items-center gap-3 mb-2">
         <label for="naca-code" class="text-sm font-medium">NACA code</label>
         <input id="naca-code" type="text" value="2412" maxlength="4"
-          class="w-24 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono">
+          class="w-24 px-2 py-1 rounded-md border font-mono bg-transparent"
+          style="border-color: var(--divider); color: var(--text);">
       </div>
-      <p id="naca-error" class="text-sm text-red-600 dark:text-red-400 mb-3 hidden"></p>
+      <p id="naca-error" class="text-sm mb-3 hidden" style="color: var(--accent-2);"></p>
 
       <canvas id="naca-canvas" width="800" height="400"
-        class="w-full border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800"></canvas>
+        class="w-full border rounded-md" style="border-color: var(--divider);"></canvas>
     </section>
 
     <!-- FBD VIEW -->
     <section id="view-fbd" class="hidden">
-      <button class="back-btn mb-4 text-sm text-slate-600 dark:text-slate-400 hover:underline">&larr; Back to tools</button>
-      <h2 class="text-lg font-semibold mb-1">Free Body Diagram Calculator</h2>
-      <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm">
+      <button class="back-btn mb-6 text-sm hover:underline" style="color: var(--accent);">&larr; Back to tools</button>
+      <h2 class="font-display text-lg font-semibold mb-1">Free Body Diagram Calculator</h2>
+      <p class="mb-5 text-sm" style="color: var(--muted);">
         Add forces as Fx/Fy components. The diagram and resultant update live.
       </p>
 
       <div id="fbd-rows" class="space-y-2 mb-3"></div>
       <button id="fbd-add-row"
-        class="mb-6 px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-600 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
+        class="mb-6 px-3 py-1.5 rounded-md border text-sm"
+        style="border-color: var(--divider); color: var(--text);">
         + Add force
       </button>
 
       <canvas id="fbd-canvas" width="800" height="450"
-        class="w-full border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 mb-4"></canvas>
+        class="w-full border rounded-md mb-4" style="border-color: var(--divider);"></canvas>
 
-      <div id="fbd-readout" class="text-sm font-mono grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      <div id="fbd-readout" class="text-sm font-mono grid grid-cols-2 sm:grid-cols-4 gap-2" style="color: var(--muted);"></div>
     </section>
 
   </main>
@@ -92,12 +124,13 @@
   function renderToolGrid() {
     const grid = document.getElementById('tool-grid');
     grid.innerHTML = '';
-    TOOLS.forEach(tool => {
+    TOOLS.forEach((tool, i) => {
       const card = document.createElement('button');
-      card.className = 'text-left p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 transition-colors';
+      card.className = 'text-left py-4 sm:py-2' + (i === 0 ? ' sm:pr-8' : ' sm:pl-8');
       card.innerHTML = `
-        <h3 class="font-semibold mb-1">${tool.title}</h3>
-        <p class="text-sm text-slate-600 dark:text-slate-400">${tool.description}</p>
+        <h3 class="font-display font-semibold mb-1">${tool.title}</h3>
+        <p class="text-sm" style="color: var(--muted);">${tool.description}</p>
+        <span class="text-sm font-semibold inline-block mt-2" style="color: var(--accent);">Open tool &rarr;</span>
       `;
       card.addEventListener('click', () => showView(tool.id));
       grid.appendChild(card);
@@ -117,6 +150,7 @@
   function applyTheme(theme) {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     document.getElementById('theme-toggle-label').textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+    document.getElementById('theme-toggle-knob').style.transform = theme === 'dark' ? 'translateX(16px)' : 'translateX(0)';
   }
   function initTheme() {
     const stored = localStorage.getItem(THEME_KEY);
@@ -188,9 +222,9 @@
       ctx.clearRect(0, 0, w, h);
 
       const isDark = document.documentElement.classList.contains('dark');
-      const gridColor = isDark ? '#334155' : '#e2e8f0';
-      const axisColor = isDark ? '#64748b' : '#94a3b8';
-      const lineColor = isDark ? '#38bdf8' : '#0284c7';
+      const gridColor = isDark ? '#1c1c22' : '#eeece5';
+      const axisColor = isDark ? '#3a3a42' : '#c9c6ba';
+      const lineColor = isDark ? '#d4ff5c' : '#4d7c0f';
 
       const margin = 40;
       const plotW = w - margin * 2;
@@ -282,14 +316,14 @@
         const div = document.createElement('div');
         div.className = 'flex items-center gap-2';
         div.innerHTML = `
-          <span class="text-sm w-16 text-slate-600 dark:text-slate-400">Force #${row.id}</span>
+          <span class="text-sm w-16" style="color: var(--muted);">Force #${row.id}</span>
           <label class="text-xs">Fx</label>
           <input type="number" value="${row.fx}" data-id="${row.id}" data-axis="fx"
-            class="fbd-input w-24 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+            class="fbd-input w-24 px-2 py-1 rounded-md border bg-transparent" style="border-color: var(--divider); color: var(--text);">
           <label class="text-xs">Fy</label>
           <input type="number" value="${row.fy}" data-id="${row.id}" data-axis="fy"
-            class="fbd-input w-24 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
-          <button data-id="${row.id}" class="fbd-remove text-sm text-red-600 dark:text-red-400 hover:underline ml-auto">Remove</button>
+            class="fbd-input w-24 px-2 py-1 rounded-md border bg-transparent" style="border-color: var(--divider); color: var(--text);">
+          <button data-id="${row.id}" class="fbd-remove text-sm hover:underline ml-auto" style="color: var(--accent-2);">Remove</button>
         `;
         rowsEl.appendChild(div);
       });
@@ -315,10 +349,10 @@
       ctx.clearRect(0, 0, w, h);
 
       const isDark = document.documentElement.classList.contains('dark');
-      const gridColor = isDark ? '#334155' : '#e2e8f0';
-      const axisColor = isDark ? '#64748b' : '#94a3b8';
-      const forceColor = isDark ? '#38bdf8' : '#0284c7';
-      const resultColor = isDark ? '#f97316' : '#ea580c';
+      const gridColor = isDark ? '#1c1c22' : '#eeece5';
+      const axisColor = isDark ? '#3a3a42' : '#c9c6ba';
+      const forceColor = isDark ? '#d4ff5c' : '#4d7c0f';
+      const resultColor = isDark ? '#ffb347' : '#b45309';
 
       const cx = w / 2;
       const cy = h / 2;
