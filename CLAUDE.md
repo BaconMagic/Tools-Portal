@@ -18,3 +18,10 @@ This project has two hard constraints that must never be violated:
    only — no frameworks or libraries that require a build/bundle step
    (e.g. React, Vue, TypeScript, Sass, Webpack/Vite). The file must run by
    simply opening it in a browser, with no compilation or tooling required.
+
+## Tech stack (hard constraints — do not deviate)
+- Vanilla HTML, CSS, and JavaScript only. No React, Vue, or any JS framework.
+- Tailwind CSS for all styling (via CDN only).
+- No backend, no database. Fully static site.
+- A toggle for light and dark theme, with the choice remembered
+  across visits.
