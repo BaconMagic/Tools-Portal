@@ -66,12 +66,15 @@ summary once it's stable, so this stays skimmable as the collection grows.
 
 ### Phases
 
-**Phase 1 — Portal shell + first two tools**
-- Home card grid, single-page view switcher, persisted light/dark toggle.
+**Phase 1 — Portal shell + first two tools — DONE**
+- Home card grid, single-page view switcher, persisted light/dark toggle,
+  restyled to the "Minimal Dark Studio" visual direction (Space Grotesk +
+  Manrope, lime/amber accents, matching light/dark palettes).
 - Tool: Aerofoil (NACA 4-digit) visualizer — outline plot only.
 - Tool: Free Body Diagram calculator — Cartesian force input, resultant
   vector + readout.
-- Proves the pattern: adding tool N+1 shouldn't require shell rework.
+- Pattern proven: both tools are plain `TOOLS` entries + `<section>` +
+  IIFE module, no shell changes needed to add either.
 
 **Phase 2 — Third+ tool(s), TBD**
 - Scope not yet defined. When starting, follow Working conventions above:
